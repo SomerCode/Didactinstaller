@@ -53,18 +53,34 @@ upload_to_github() {
   github_username="SomerCode"
   repo_name="DidactConsole"
 
-  # Prompt the user for the file to upload
-  read -rp "Enter the path of the file you want to upload: " file_path
+  # Prompt the user for the file or directory to upload
+  read -rp "Enter the path of the file or directory you want to upload: " source_path
 
-  # Check if the file exists
-  if [ ! -f "$file_path" ]; then
-    echo "Error: File not found."
+  # Check if the source path exists
+  if [ ! -e "$source_path" ]; then
+    echo "Error: File or directory not found."
   else
+    # Ensure logname is set
+    logname=$(logname)
+
+    # Extract the base name from the source path
+    base_name=$(basename "$source_path")
+
+    # If it's a directory, tar and gzip it
+    if [ -d "$source_path" ]; then
+      tar_filename="${base_name}.tar.gz"
+      tar -czf "$tar_filename" -C "$(dirname "$source_path")" "$base_name"
+      source_path="$tar_filename"
+    fi
+
+    # Specify the new filename with "bySomerCode"
+    new_filename="${base_name%.*}(by${logname}).${source_path##*.}"
+
     # Specify the GitHub API endpoint for uploading a file to the repository in the "additional_packages" folder
-    api_url="https://api.github.com/repos/$github_username/$repo_name/contents/additional_packages/$(basename "$file_path")"
+    api_url="https://api.github.com/repos/$github_username/$repo_name/contents/additional_packages/$new_filename"
 
     # Base64 encode the file content for inclusion in the API request
-    file_content_base64=$(base64 -w 0 "$file_path")
+    file_content_base64=$(base64 -w 0 "$source_path")
 
     # GitHub access token (replace with your actual token)
     github_token="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"
@@ -78,7 +94,12 @@ upload_to_github() {
       -H "Accept: application/vnd.github.v3+json" \
       -d "$json_payload"
 
-    echo "File uploaded successfully to 'additional_packages' folder."
+    # If a temporary tarball was created for a directory, remove it
+    if [ -n "$tar_filename" ]; then
+      rm "$tar_filename"
+    fi
+
+    echo "File uploaded successfully to 'additional_packages' folder with the name '$new_filename'."
   fi
 }
 
