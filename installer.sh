@@ -83,7 +83,7 @@ upload_to_github() {
     file_content_base64=$(base64 -w 0 "$source_path")
 
     # GitHub access token (replace with your actual token)
-    github_token="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"
+    github_token="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"
 
     # Create a JSON payload for the API request
     json_payload="{\"message\": \"Upload file\", \"content\": \"$file_content_base64\"}"
