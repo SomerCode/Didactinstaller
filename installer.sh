@@ -97,6 +97,7 @@ else
 fi
 
 if [ -d "$(dirname "$0")/files" ]; then
+rmdir "$(dirname "$0")/files"
   get_additional
 else
   echo "additional files not found..."
@@ -127,6 +128,7 @@ while [ "$loopset" = true ]; do
     read -p 'Press enter to continue...' dummy
   elif [ "$option" = "additional" ]; then
     get_additional
+    bash listcontrol.sh
     echo $"\n"
     read -p 'Press enter to continue...' dummy
   elif [ "$option" = "upload" ]; then

@@ -1,17 +1,24 @@
 #!/bin/bash
 
-directory_path="/path/to/your/directory"  # Change this to the path of your directory
-output_file="file_list.txt"
+# Function to create a list of filenames in a directory
+create_file_list() {
+  directory="$1"
+  listfile="$directory/listfile.txt"
 
-# Check if the directory exists
-if [ -d "$directory_path" ]; then
-  # Create the header for the text file
-  echo "Version $(date '+%Y-%m-%d %H:%M:%S') Version 1.0" > "$output_file"
+  # Check if the listfile already exists and delete it
+  [ -e "$listfile" ] && rm "$listfile"
 
-  # List the files in the directory and append to the text file
-  find "$directory_path" -type f -exec basename {} \; >> "$output_file"
+  # Add the version information to the listfile
+  echo "Version $(date '+%Y-%m-%d %H:%M:%S') Version 1.0" >> "$listfile"
 
-  echo "File list created successfully."
-else
-  echo "Error: Directory not found."
-fi
+  # Iterate through files in the directory and exclude certain patterns
+  find "$directory" -type f ! -path "*/.git/*" ! -path "*/additional_packages/*" -exec basename {} >> "$listfile" \;
+
+  echo "List of files created in $listfile"
+}
+
+# Specify the directory to create the file list
+directory="$(dirname "$0")"
+
+# Create the list of filenames
+create_file_list "$directory"
