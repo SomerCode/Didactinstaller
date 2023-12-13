@@ -35,13 +35,13 @@
         }
 
         .app-container {
-        width: calc(25% - 20px); /* Adjusted width to include margin */
-        margin: 10px; /* Added margin */
-        padding: 20px;
-        text-align: center;
-        border-radius: 10px; /* Added border-radius for smooth corners */
-        background-color: #ddd; /* Grey background color */
-    }
+            width: calc(25% - 20px); /* Adjusted width to include margin */
+            margin: 10px; /* Added margin */
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px; /* Added border-radius for smooth corners */
+            background-color: #ddd; /* Grey background color */
+        }
 
         .app-container img {
             max-width: 100%;
@@ -86,23 +86,13 @@
             <h2 class="app-headline">Featured Apps</h2>
             {% for app in featured_apps %}
                 <div class="app-container">
-                    <p>{{ app['title'] }}</p>
-                    <a href="{{ app['download_link'] }}" download>Download</a>
-                </div>
-            {% endfor %}
-        </div>
-        
-
-        <div class="app-line">
-            <h2 class="app-headline">Featured Apps</h2>
-            {% for app in featured_apps %}
-                <div class="app-container">
                     <img src="{{ url_for('static', filename=app['icon']) }}" alt="{{ app['title'] }} Icon">
                     <p>{{ app['title'] }}</p>
                     <a href="{{ app['download_link'] }}" download>Download</a>
                 </div>
             {% endfor %}
         </div>
+        
     </div>
 </body>
 </html>

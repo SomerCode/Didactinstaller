@@ -1,7 +1,8 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, redirect, url_for
 import webbrowser
 import os
 import subprocess
+import shutil
 
 app = Flask(__name__)
 
@@ -15,15 +16,12 @@ def launcher():
 
 @app.route('/download')
 def download():
-    # Replace <YOUR_GITHUB_REPO_URL> with the actual repository URL
     repo_url = "https://github.com/SomerCode/DidactConsole.git"
     destination_folder = os.path.join(os.getcwd(), 'packages')
 
-    # Check if the destination folder exists, create if not
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
 
-    # Clone files from GitHub repository to the 'packages' subdirectory
     try:
         subprocess.check_output(['git', 'clone', repo_url, destination_folder], text=True)
         result = "Download from GitHub completed."
@@ -38,25 +36,33 @@ def get_apps(package_folder):
     standard_apps = []
     featured_apps = []
 
-    for subdir, _, files in os.walk(package_folder):
-        if 'icon.png' in files:
-            app_title = os.path.basename(subdir)
+    for root, dirs, files in os.walk(package_folder):
+        if root == package_folder:
+            app_title = os.path.basename(root)
             app_download_link = f"/download/{app_title}"
 
             app_info = {'title': app_title, 'download_link': app_download_link}
 
-            if '.placeholder' in files:
-                standard_apps.append(app_info)
-            else:
-                featured_apps.append(app_info)
+            standard_apps.append(app_info)
+        else:
+            app_title = os.path.basename(root)
+            app_download_link = f"/download/{app_title}"
+
+            app_info = {'title': app_title, 'download_link': app_download_link}
+
+            featured_apps.append(app_info)
 
     return standard_apps, featured_apps
 
 @app.route('/download/<app_title>')
 def download_app(app_title):
-    # Assume the app_title matches the directory name
     app_folder = os.path.join(os.getcwd(), 'packages', app_title)
-    return send_from_directory(app_folder, 'your_app_file.ext', as_attachment=True)
+    installed_folder = os.path.join(os.getcwd(), 'installed')
+
+    # Move the app data to the 'installed' directory
+    shutil.move(app_folder, os.path.join(installed_folder, app_title))
+
+    return send_from_directory(installed_folder, app_title, as_attachment=True)
 
 @app.route('/upload')
 def upload():
