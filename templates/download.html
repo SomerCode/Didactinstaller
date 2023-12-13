@@ -5,62 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask App Store</title>
     <style>
-        body {
-            display: flex;
-            margin: 0;
-            height: 100vh;
-        }
+body, html {
+    height: 100%;
+    margin: 0;
+}
 
-        #sidebar {
-            width: 250px;
-            background: linear-gradient(to bottom, orange, yellow);
-            color: white;
-            padding: 20px;
-            height: 100%;
-            overflow-y: auto;
-        }
+body {
+    display: flex;
+}
 
-        #sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
-        }
+#sidebar {
+    width: 230px; /* Adjusted width */
+    background: linear-gradient(to bottom, orange, yellow);
+    color: white;
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto; /* Allow vertical scrollbar if needed */
+    position: fixed; /* Fix the sidebar position */
+}
 
-        #content {
-            flex: 1;
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-        }
+#sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px; /* Added padding for better appearance */
+    border-radius: 5px; /* Added border-radius for rounded corners */
+    transition: background-color 0.3s; /* Smooth transition for background color change */
+}
 
-        .app-container {
-            width: calc(25% - 20px); /* Adjusted width to include margin */
-            margin: 10px; /* Added margin */
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px; /* Added border-radius for smooth corners */
-            background-color: #ddd; /* Grey background color */
-        }
+#sidebar a:hover {
+    background-color: #555; /* Change background color on hover */
+}
 
-        .app-container img {
-            max-width: 100%;
-            max-height: 100px;
-        }
+#content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 250px; /* Adjust content margin to accommodate the fixed sidebar */
+}
 
-        .app-line {
-            width: 100%;
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto; /* Enable horizontal scrollbar if needed */
-            margin-bottom: 20px;
-        }
+.app-container {
+    width: calc(25% - 20px);
+    margin: 10px;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    background-color: #ddd;
+}
 
-        .app-headline {
-            width: 100%;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
+.app-container img {
+    max-width: 100%;
+    max-height: 100px;
+}
+
+.app-line {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.app-headline {
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+/* Add styles for the download button */
+.download-button {
+    display: inline-block;
+    padding: 10px;
+    background-color: green;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.download-button.installed {
+    background-color: grey;
+    cursor: not-allowed;
+    pointer-events: none; /* Disable pointer events to prevent hover and click on installed button */
+}
+
+/* Add a transition effect for a smooth color change */
+.download-button:hover:not(.installed) {
+    background-color: darkgreen;
+}
+
+/* Increase font size and make app titles bold */
+.app-container p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+.download-button.installed {
+    background-color: grey;
+    cursor: not-allowed;
+}
+
+/* Add a transition effect for a smooth color change */
+.download-button:hover {
+    background-color: darkgreen;
+}
+#search-bar {
+    text-align: center;
+    margin-bottom: 10px; /* Adjust the margin as needed */
+}
+
+#package-search {
+    padding: 10px;
+    font-size: 16px;
+    width: 80%; /* Adjust the width as needed */
+    box-sizing: border-box;
+    margin: 0 auto; /* Center the search bar horizontally */
+    display: block;
+}
+
     </style>
 </head>
 <body>
@@ -71,16 +136,20 @@
         <a href="{{ url_for('account') }}">Account</a>
     </div>
     <div id="content">
+        <div id="search-bar">
+            <input type="text" id="package-search" placeholder="Search packages..." oninput="searchPackages()">
+        </div>
         
         <div class="app-line">
             <h2 class="app-headline">Standard Apps</h2>
             {% for app in standard_apps %}
                 <div class="app-container">
                     <p>{{ app['title'] }}</p>
-                    <a href="{{ app['download_link'] }}" download>Download</a>
+                    <a href="{{ app['download_link'] }}" class="download-button" data-app="{{ app['title'] }}" download>Download</a>
                 </div>
             {% endfor %}
         </div>
+        
         
         <div class="app-line">
             <h2 class="app-headline">Featured Apps</h2>
@@ -88,11 +157,50 @@
                 <div class="app-container">
                     <img src="{{ url_for('static', filename=app['icon']) }}" alt="{{ app['title'] }} Icon">
                     <p>{{ app['title'] }}</p>
-                    <a href="{{ app['download_link'] }}" download>Download</a>
+                    {% if app['installed'] %}
+                        <button disabled>Installed</button>
+                    {% else %}
+                        <a href="{{ app['download_link'] }}" download><button>Download</button></a>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
         
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var downloadButtons = document.querySelectorAll('.download-button');
+        
+            downloadButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    // Disable the button and change text on click
+                    button.classList.add('installed');
+                    button.innerHTML = 'Installed';
+                    button.disabled = true; // Disable the button to prevent further clicks
+        
+                    // You can add additional logic here, e.g., trigger installation process
+                });
+            });
+        });
+        </script>
+        <!-- Add this JavaScript code below the existing script -->
+<script>
+    function searchPackages() {
+        var input, filter, appContainers, appTitles, i;
+        input = document.getElementById("package-search");
+        filter = input.value.toUpperCase();
+        appContainers = document.querySelectorAll('.app-container');
+    
+        appContainers.forEach(function (container) {
+            appTitles = container.getElementsByTagName("p")[0];
+            if (appTitles.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                container.style.display = "";
+            } else {
+                container.style.display = "none";
+            }
+        });
+    }
+    </script>
+    
 </body>
 </html>
