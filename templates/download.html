@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask App Store</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 250px;
+            background: linear-gradient(to bottom, orange, yellow);
+            color: white;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        #sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .app-container {
+        width: calc(25% - 20px); /* Adjusted width to include margin */
+        margin: 10px; /* Added margin */
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px; /* Added border-radius for smooth corners */
+        background-color: #ddd; /* Grey background color */
+    }
+
+        .app-container img {
+            max-width: 100%;
+            max-height: 100px;
+        }
+
+        .app-line {
+            width: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto; /* Enable horizontal scrollbar if needed */
+            margin-bottom: 20px;
+        }
+
+        .app-headline {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <a href="{{ url_for('launcher') }}">Launcher</a>
+        <a href="{{ url_for('download') }}">Download</a>
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </div>
+    <div id="content">
+        
+        <div class="app-line">
+            <h2 class="app-headline">Standard Apps</h2>
+            {% for app in standard_apps %}
+                <div class="app-container">
+                    <p>{{ app['title'] }}</p>
+                    <a href="{{ app['download_link'] }}" download>Download</a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="app-line">
+            <h2 class="app-headline">Featured Apps</h2>
+            {% for app in featured_apps %}
+                <div class="app-container">
+                    <p>{{ app['title'] }}</p>
+                    <a href="{{ app['download_link'] }}" download>Download</a>
+                </div>
+            {% endfor %}
+        </div>
+        
+
+        <div class="app-line">
+            <h2 class="app-headline">Featured Apps</h2>
+            {% for app in featured_apps %}
+                <div class="app-container">
+                    <img src="{{ url_for('static', filename=app['icon']) }}" alt="{{ app['title'] }} Icon">
+                    <p>{{ app['title'] }}</p>
+                    <a href="{{ app['download_link'] }}" download>Download</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

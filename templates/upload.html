@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Sidebar</title>
+    <style>
+        body {
+    display: flex;
+    margin: 0;
+    height: 100vh; /* Set the body height to the full viewport height */
+}
+
+#sidebar {
+    width: 250px;
+    background: linear-gradient(to bottom, orange, yellow); /* Gradient from orange to yellow */
+    color: white;
+    padding: 20px;
+    height: 100%; /* Set the sidebar height to 100% of the body height */
+}
+
+#content {
+    flex: 1;
+    padding: 20px;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+}
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <a href="{{ url_for('launcher') }}">Launcher</a>
+        <a href="{{ url_for('download') }}">Download</a>
+        <a href="{{ url_for('upload') }}">Upload</a>
+        <a href="{{ url_for('account') }}">Account</a>
+    </div>
+    <div id="content">
+        <h1>Welcome to the Index Page!</h1>
+        <p>This is a simple Flask app with a sidebar.</p>
+    </div>
+</body>
+</html>
