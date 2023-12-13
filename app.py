@@ -32,7 +32,11 @@ def download():
     standard_apps, featured_apps = get_apps(destination_folder)
 
     installed_folder = os.path.join(os.getcwd(), 'installed')
-    
+
+    # Check if the "installed" directory exists, create it if not
+    if not os.path.exists(installed_folder):
+        os.makedirs(installed_folder)
+
     # Fix the line causing the TypeError
     installed_apps = os.listdir(installed_folder)
 
