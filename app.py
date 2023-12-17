@@ -1,9 +1,9 @@
-from flask import Flask, render_template, send_from_directory, redirect, url_for, safe_join
+from flask import Flask, render_template, send_from_directory, safe_join
 import webbrowser
 import os
 import subprocess
 import shutil
-import mimetypes  # Add this import statement
+import mimetypes
 
 app = Flask(__name__)
 
@@ -18,28 +18,40 @@ def launcher():
 @app.route('/download')
 def download():
     repo_url = "https://github.com/SomerCode/DidactConsole.git"
-    destination_folder = os.path.join(os.path.dirname(os.getcwd()), 'packages', 'additional_packages')
+    destination_folder = os.path.join(os.getcwd(), '..', 'packages', 'additional_packages')
 
+    # Clone the repository if the destination folder doesn't exist
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
+        try:
+            subprocess.check_output(['git', 'clone', repo_url, destination_folder], text=True, cwd=os.path.dirname(os.getcwd()))
+            result = "Download from GitHub completed."
+        except subprocess.CalledProcessError as e:
+            result = f"Error: {e.output}"
+            print("Clone Error:", e.output)
+            return render_template('download.html', result=result, standard_apps=[], featured_apps=[])
 
-    try:
-        subprocess.check_output(['git', 'clone', repo_url, destination_folder], text=True)
-        result = "Download from GitHub completed."
-    except subprocess.CalledProcessError as e:
-        result = f"Error: {e.output}"
+    # Update the repository if the destination folder exists
+    else:
+        try:
+            subprocess.check_output(['git', 'pull'], cwd=destination_folder, text=True)
+            result = "Update from GitHub completed."
+        except subprocess.CalledProcessError as e:
+            result = f"Error updating: {e.output}"
+            print("Pull Error:", e.output)
+            return render_template('download.html', result=result, standard_apps=[], featured_apps=[])
 
-    standard_apps, featured_apps = get_apps(destination_folder)
-
+    # Get the list of installed apps
     installed_folder = os.path.join(os.getcwd(), 'installed')
-
-    # Check if the "installed" directory exists, create it if not
     if not os.path.exists(installed_folder):
         os.makedirs(installed_folder)
-
-    # Fix the line causing the TypeError
+    
     installed_apps = os.listdir(installed_folder)
 
+    # Get the list of available apps
+    standard_apps, featured_apps = get_apps(destination_folder)
+
+    # Update the 'installed' status for each featured app
     for app in featured_apps:
         app['installed'] = app['title'] in installed_apps
 
@@ -72,17 +84,15 @@ def get_apps(package_folder):
             featured_apps.append(app_info)
 
     return standard_apps, featured_apps
+
 @app.route('/download/<app_title>')
 def download_app(app_title):
-    app_folder = safe_join(os.path.dirname(os.getcwd()), 'packages', 'additional_packages', app_title)
+    # Define source and destination folders
+    app_source_folder = os.path.join(os.getcwd(), '..', 'packages', 'additional_packages', app_title)
     installed_folder = os.path.join(os.getcwd(), 'installed')
 
-    # Check if the "installed" directory exists, create it if not
-    if not os.path.exists(installed_folder):
-        os.makedirs(installed_folder)
-
     # Move the app data to the 'installed' directory
-    shutil.move(app_folder, os.path.join(installed_folder, app_title))
+    shutil.move(app_source_folder, os.path.join(installed_folder, app_title))
 
     # Construct the correct file path
     file_path = os.path.join(installed_folder, app_title)
